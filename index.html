@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zion — Rides, Reimagined</title>
+<meta name="description" content="Zion is a new-generation ride-hailing platform delivering affordable rides for riders, better earnings for drivers, and real engagement for advertisers.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<style>
+  :root{
+    --bg:        #161617;   /* black2X */
+    --bg-soft:   #1e1e1e;   /* black3X */
+    --bg-raise:  #303030;   /* black4LightX */
+    --white:     #ffffff;   /* white0X */
+    --gray1:     #cdcdcd;
+    --gray2:     #b9b9b9;
+    --gray3:     #919191;   /* gray3X */
+    --fire:      #e63946;   /* fire_red */
+    --fire-dim:  #e6394633;
+    --green:     #32bb78;   /* tree_green */
+    --line:      rgba(255,255,255,0.08);
+    --glass:     rgba(255,255,255,0.045);
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ background:var(--bg); }
+  body{
+    background:var(--bg);
+    color:var(--white);
+    font-family:'Outfit', sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--fire); color:#fff; }
+
+  a{ text-decoration:none; color:inherit; }
+  ul{ list-style:none; }
+  img,svg{ display:block; max-width:100%; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+
+  /* ---------- Type scale mirrors the app's Themes class ---------- */
+  .logo-wordmark{
+    font-family:'Outfit', sans-serif;
+    font-weight:500;
+    letter-spacing:-2.5px;
+    color:var(--fire);
+  }
+  h1,h2,h3,h4{ font-family:'Outfit', sans-serif; font-weight:500; letter-spacing:-0.03em; line-height:1.05; }
+  .eyebrow{
+    font-size:13px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gray3);
+    display:inline-flex; align-items:center; gap:12px;
+  }
+  .eyebrow::before{
+    content:''; width:28px; height:1px; background:var(--fire); display:inline-block;
+  }
+
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 32px; }
+  @media(max-width:640px){ .wrap{ padding:0 20px; } }
+
+  /* ---------- Cinematic layers: grain + vignette ---------- */
+  #grain{
+    position:fixed; inset:-100px; z-index:98; pointer-events:none; opacity:.055;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grainShift 1.2s steps(6) infinite;
+  }
+  @keyframes grainShift{
+    0%{ transform:translate(0,0); }
+    20%{ transform:translate(-30px,20px); }
+    40%{ transform:translate(20px,-35px); }
+    60%{ transform:translate(-25px,-15px); }
+    80%{ transform:translate(30px,25px); }
+    100%{ transform:translate(0,0); }
+  }
+  .hero-vignette{
+    position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgba(10,10,11,0.55) 100%);
+  }
+
+  /* ---------- Loader ---------- */
+  #loader{
+    position:fixed; inset:0; z-index:999; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+  }
+  #loader .mark{
+    font-size:15vw; line-height:1; opacity:0;
+    filter:drop-shadow(0 0 40px rgba(230,57,70,0.5));
+  }
+  #loader .loader-line{
+    width:0; height:1px; margin:22px auto 0; background:linear-gradient(90deg, transparent, var(--fire), transparent);
+  }
+  @media(min-width:640px){ #loader .mark{ font-size:80px; } }
+
+  /* ---------- Nav ---------- */
+  header{
+    position:fixed; top:0; left:0; width:100%; z-index:100;
+    padding:20px 0;
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    background:rgba(22,22,23,0.55);
+    border-bottom:1px solid transparent;
+    transition:border-color .4s ease, padding .4s ease;
+  }
+  header.scrolled{ border-bottom-color:var(--line); padding:14px 0; }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; }
+  .nav-logo{
+    font-size:26px; position:relative;
+    transition:filter .6s ease, transform .6s cubic-bezier(.2,.8,.2,1);
+  }
+  header.mark-landed .nav-logo{
+    filter:drop-shadow(0 0 14px rgba(230,57,70,0.65));
+    transform:scale(1.06);
+  }
+  .nav-links{ display:flex; gap:36px; align-items:center; }
+  .nav-links a{
+    font-size:14.5px; font-weight:500; color:var(--gray1);
+    position:relative; transition:color .25s ease;
+  }
+  .nav-links a:hover{ color:var(--white); }
+  .nav-links a::after{
+    content:''; position:absolute; left:0; bottom:-6px; width:0; height:1px;
+    background:var(--fire); transition:width .3s ease;
+  }
+  .nav-links a:hover::after{ width:100%; }
+  .btn-nav{
+    font-size:14px; font-weight:600; padding:10px 22px; border-radius:999px;
+    background:var(--fire); color:#fff; display:inline-flex; align-items:center; gap:8px;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
+  }
+  .btn-nav:hover{ transform:translateY(-2px); box-shadow:0 10px 30px -8px var(--fire-dim); }
+  .nav-toggle{ display:none; }
+  @media(max-width:860px){
+    .nav-links{ display:none; }
+    .nav-toggle{ display:block; }
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:16px 34px; border-radius:999px; font-weight:600; font-size:15px;
+    position:relative; overflow:hidden;
+    transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease, background .3s ease, border-color .3s ease;
+    will-change:transform;
+  }
+  .btn-primary{
+    background:var(--fire); color:#fff;
+    box-shadow:0 0 0 0 rgba(230,57,70,0), inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .btn-primary::after{
+    content:''; position:absolute; top:0; left:-80%; width:50%; height:100%;
+    background:linear-gradient(105deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform:skewX(-20deg); transition:left .7s cubic-bezier(.2,.8,.2,1);
+  }
+  .btn-primary:hover{ transform:translateY(-3px) scale(1.02); box-shadow:0 18px 46px -10px rgba(230,57,70,0.5); }
+  .btn-primary:hover::after{ left:130%; }
+  .btn-ghost{
+    background:var(--glass); color:var(--white); border:1px solid var(--line);
+    backdrop-filter:blur(8px);
+  }
+  .btn-ghost:hover{ background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.22); transform:translateY(-3px); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:100svh; position:relative; display:flex; align-items:center;
+    padding-top:120px; overflow:hidden;
+  }
+  .hero-glow{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+  }
+  .orb{
+    position:absolute; border-radius:50%; filter:blur(70px); pointer-events:none;
+    will-change:transform;
+  }
+  .orb-fire{
+    width:56vw; height:56vw; max-width:700px; max-height:700px;
+    top:-20%; left:50%; transform:translateX(-50%);
+    background:radial-gradient(circle, rgba(230,57,70,0.34), transparent 68%);
+    animation:driftA 14s ease-in-out infinite;
+  }
+  .orb-green{
+    width:34vw; height:34vw; max-width:420px; max-height:420px;
+    top:18%; right:-8%;
+    background:radial-gradient(circle, rgba(50,187,120,0.20), transparent 68%);
+    animation:driftB 18s ease-in-out infinite;
+  }
+  .orb-fire-low{
+    width:44vw; height:30vw; max-width:560px; max-height:380px;
+    bottom:-14%; left:-10%;
+    background:radial-gradient(circle, rgba(230,57,70,0.14), transparent 70%);
+    animation:driftB 22s ease-in-out infinite reverse;
+  }
+  @keyframes driftA{
+    0%,100%{ transform:translate(-50%,0) scale(1); }
+    50%{ transform:translate(-46%,4%) scale(1.08); }
+  }
+  @keyframes driftB{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(-6%,-6%) scale(1.1); }
+  }
+
+  /* volumetric light beams */
+  .beam{
+    position:absolute; top:-30%; width:44vw; height:160%; z-index:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(230,57,70,0.10), rgba(230,57,70,0.02) 55%, transparent);
+    filter:blur(40px); mix-blend-mode:screen; transform-origin:top center;
+    opacity:.7;
+  }
+  .beam-1{ left:8%; transform:rotate(14deg); animation:beamSway 16s ease-in-out infinite; }
+  .beam-2{ right:4%; width:34vw; transform:rotate(-18deg);
+    background:linear-gradient(180deg, rgba(255,255,255,0.05), transparent 60%);
+    animation:beamSway 20s ease-in-out infinite reverse; }
+  @keyframes beamSway{
+    0%,100%{ transform:rotate(14deg) translateX(0); opacity:.55; }
+    50%{ transform:rotate(11deg) translateX(3vw); opacity:.85; }
+  }
+
+  /* dust particles canvas */
+  #dust{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+  }
+
+  /* ---------- Centered watermark + subtitle group ---------- */
+  .hero-mark-group{
+    position:absolute; top:50%; left:0; right:0; z-index:0; pointer-events:none;
+    transform:translateY(-52%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:100%;
+    will-change:transform, opacity;
+  }
+  .hero-mark-stack{ position:relative; width:100%; }
+  .hero-mark, .hero-mark-halo{
+    width:100%;
+    text-align:center;
+    font-family:'Outfit', sans-serif; font-weight:700; letter-spacing:0.02em;
+    font-size:min(32vw, 460px); line-height:1;
+    white-space:nowrap; user-select:none;
+  }
+  .hero-mark{
+    position:relative; z-index:1;
+    background:linear-gradient(115deg,
+      rgba(255,255,255,0.92) 0%,
+      rgba(255,255,255,0.55) 28%,
+      rgba(230,57,70,0.95) 46%,
+      rgba(255,138,146,0.85) 52%,
+      rgba(230,57,70,0.95) 58%,
+      rgba(255,255,255,0.55) 76%,
+      rgba(255,255,255,0.92) 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+    animation:markSheen 9s ease-in-out infinite, markBreathe 9s ease-in-out infinite;
+  }
+  .hero-mark-halo{
+    position:absolute; inset:0; z-index:0;
+    color:rgba(230,57,70,0.55);
+    filter:blur(46px);
+    animation:haloPulse 9s ease-in-out infinite;
+  }
+  @keyframes markSheen{
+    0%,100%{ background-position:0% 50%; }
+    50%{ background-position:100% 50%; }
+  }
+  @keyframes markBreathe{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.025); }
+  }
+  @keyframes haloPulse{
+    0%,100%{ opacity:.5; transform:scale(1); }
+    50%{ opacity:.95; transform:scale(1.04); }
+  }
+  .hero-mark-sub{
+    margin-top:clamp(10px, 2vw, 24px);
+    text-align:center;
+    font-size:clamp(11.5px, 1.5vw, 16px);
+    font-weight:500;
+    letter-spacing:0.38em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.55);
+    white-space:nowrap;
+    text-shadow:0 0 24px rgba(230,57,70,0.5);
+    display:flex; align-items:center; justify-content:center; gap:clamp(10px,1.6vw,20px);
+  }
+  .hero-mark-sub::before, .hero-mark-sub::after{
+    content:''; height:1px; width:clamp(26px, 6vw, 72px);
+    background:linear-gradient(90deg, transparent, rgba(230,57,70,0.7));
+  }
+  .hero-mark-sub::after{
+    background:linear-gradient(90deg, rgba(230,57,70,0.7), transparent);
+  }
+
+  .hero-grid{
+    position:absolute; inset:-10%; z-index:0; opacity:0.5;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 20%, black, transparent 75%);
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 20%, black, transparent 75%);
+    will-change:transform;
+  }
+  .hero-content{ position:relative; z-index:3; text-align:center; margin:0 auto; }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 16px;
+    border-radius:999px; border:1px solid var(--line); background:var(--glass);
+    backdrop-filter:blur(10px);
+    font-size:13px; color:var(--gray2); margin-bottom:28px;
+  }
+  .hero-badge .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--green);
+    box-shadow:0 0 0 0 rgba(50,187,120,0.5);
+    animation:dotPing 2.4s ease-out infinite;
+  }
+  @keyframes dotPing{
+    0%{ box-shadow:0 0 0 0 rgba(50,187,120,0.55); }
+    70%{ box-shadow:0 0 0 9px rgba(50,187,120,0); }
+    100%{ box-shadow:0 0 0 0 rgba(50,187,120,0); }
+  }
+  .hero h1{
+    font-size:clamp(40px, 8vw, 96px);
+    max-width:920px; margin:0 auto 24px;
+    text-shadow:0 8px 60px rgba(0,0,0,0.5);
+  }
+  .hero h1 .accent{
+    color:var(--fire);
+    text-shadow:0 0 40px rgba(230,57,70,0.45);
+  }
+  .hero h1 .word{ display:inline-block; will-change:transform, opacity, filter; }
+  .hero p.sub{
+    font-size:clamp(16px, 2vw, 20px); color:var(--gray3); max-width:560px; margin:0 auto 44px;
+    font-weight:300; line-height:1.6;
+  }
+  .hero-ctas{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:80px; }
+
+  .hero-visual{
+    position:relative; z-index:3; max-width:900px; margin:0 auto; padding:0 20px;
+    perspective:1200px;
+  }
+  .hero-card{
+    border-radius:28px; border:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
+    backdrop-filter:blur(20px); padding:28px;
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition:transform .25s ease-out;
+    will-change:transform;
+    transform-style:preserve-3d;
+  }
+  @media(max-width:640px){ .hero-card{ grid-template-columns:1fr; } }
+  .fare-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border-radius:16px; background:rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    transition:background .3s ease, border-color .3s ease;
+  }
+  .fare-row:hover{ background:rgba(255,255,255,0.055); border-color:rgba(230,57,70,0.3); }
+  .fare-row .veh{ display:flex; align-items:center; gap:14px; }
+  .fare-row .veh-icon{
+    width:44px; height:44px; border-radius:12px; background:var(--bg-raise);
+    display:flex; align-items:center; justify-content:center; color:var(--fire);
+  }
+  .fare-row .name{ font-weight:600; font-size:15px; }
+  .fare-row .meta{ font-size:12.5px; color:var(--gray3); }
+  .fare-row .price{ font-weight:700; font-size:17px; }
+
+  /* ---------- Scroll cue ---------- */
+  .scroll-cue{
+    position:absolute; bottom:34px; left:50%; transform:translateX(-50%); z-index:3;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    transition:opacity .3s ease;
+  }
+  .scroll-cue-label{
+    font-size:10.5px; font-weight:600; letter-spacing:0.22em; text-transform:uppercase;
+    color:var(--gray3);
+  }
+  .scroll-cue-track{
+    width:24px; height:38px; border-radius:14px; border:1px solid var(--line);
+    display:flex; justify-content:center; padding-top:7px;
+    background:var(--glass);
+  }
+  .scroll-cue-dot{
+    width:4px; height:8px; border-radius:2px; background:var(--fire);
+    animation:scrollDot 1.9s ease-in-out infinite;
+  }
+  @keyframes scrollDot{
+    0%{ transform:translateY(0); opacity:1; }
+    65%{ transform:translateY(14px); opacity:0; }
+    66%{ transform:translateY(0); opacity:0; }
+    100%{ transform:translateY(0); opacity:1; }
+  }
+
+  /* ---------- Section shell ---------- */
+  section{ padding:120px 0; position:relative; }
+  #about, #services, #stakeholders, #waitlist, #contact{
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(230,57,70,0.045), transparent 70%);
+  }
+  #about::before, #services::before, #stakeholders::before, #waitlist::before, #contact::before{
+    content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:min(680px, 80%); height:1px;
+    background:linear-gradient(90deg, transparent, rgba(230,57,70,0.35), rgba(255,255,255,0.14), rgba(230,57,70,0.35), transparent);
+  }
+  .section-head{ max-width:640px; margin-bottom:64px; }
+  .section-head h2{ font-size:clamp(30px, 4.5vw, 48px); margin-top:14px; }
+  .section-head p{ color:var(--gray3); font-size:17px; font-weight:300; margin-top:16px; line-height:1.7; }
+
+  /* ---------- Spotlight cards (mouse-tracked glow) ---------- */
+  .spot{ position:relative; }
+  .spot::after{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%), rgba(230,57,70,0.10), transparent 65%);
+    opacity:0; transition:opacity .35s ease;
+  }
+  .spot:hover::after{ opacity:1; }
+
+  /* ---------- Model blocks (primary + bonus) ---------- */
+  .model-stack{ display:flex; flex-direction:column; gap:24px; }
+  .model-block{
+    border-radius:26px; border:1px solid var(--line); padding:44px; position:relative; overflow:hidden;
+  }
+  .model-primary{
+    background:linear-gradient(155deg, rgba(230,57,70,0.10), rgba(255,255,255,0.02));
+    border-color:rgba(230,57,70,0.28);
+    box-shadow:0 0 80px -30px rgba(230,57,70,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .model-bonus{ background:var(--bg-soft); }
+  .model-tag{
+    display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px;
+    font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:20px;
+  }
+  .model-primary .model-tag{ background:rgba(230,57,70,0.16); color:#ff8a92; }
+  .model-bonus .model-tag{ background:rgba(255,255,255,0.06); color:var(--gray2); }
+  .model-block h3{ font-size:26px; margin-bottom:14px; max-width:560px; }
+  .model-block > p.desc{ color:var(--gray3); font-size:15.5px; font-weight:300; max-width:560px; line-height:1.75; margin-bottom:24px; }
+  .model-points{ display:flex; flex-wrap:wrap; gap:12px; }
+  .model-point{
+    display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:12px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--line);
+    font-size:13.5px; color:var(--gray1); font-weight:500;
+    transition:border-color .3s ease, background .3s ease, transform .3s ease;
+  }
+  .model-point:hover{ border-color:rgba(230,57,70,0.4); background:rgba(230,57,70,0.06); transform:translateY(-2px); }
+  .model-point svg{ color:var(--fire); flex-shrink:0; }
+  .price-chips{ display:flex; gap:12px; flex-wrap:wrap; }
+  .price-chip{
+    padding:14px 20px; border-radius:14px; background:rgba(255,255,255,0.04); border:1px solid var(--line);
+    display:flex; flex-direction:column; gap:2px; min-width:140px;
+    transition:border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+  }
+  .price-chip:hover{ border-color:rgba(230,57,70,0.45); transform:translateY(-3px); box-shadow:0 14px 30px -14px rgba(230,57,70,0.35); }
+  .price-chip .veh-label{ font-size:12.5px; color:var(--gray3); }
+  .price-chip .price-value{ font-size:20px; font-weight:700; }
+  .price-chip .price-value span{ font-size:12px; color:var(--gray3); font-weight:400; }
+
+  /* ---------- Services ---------- */
+  .services-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media(max-width:760px){ .services-grid{ grid-template-columns:1fr; } }
+  .service-card{
+    position:relative; border-radius:26px; padding:44px; overflow:hidden;
+    border:1px solid var(--line); background:var(--bg-soft);
+    transition:transform .5s cubic-bezier(.2,.8,.2,1), border-color .4s ease, box-shadow .5s ease;
+    min-height:340px; display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  .service-card:hover{
+    transform:translateY(-8px);
+    border-color:rgba(230,57,70,0.35);
+    box-shadow:0 30px 70px -30px rgba(230,57,70,0.3);
+  }
+  .service-card .glow{
+    position:absolute; top:-40%; right:-20%; width:70%; height:70%; border-radius:50%;
+    background:radial-gradient(circle, var(--fire-dim), transparent 70%); filter:blur(10px);
+    transition:opacity .4s ease; opacity:0.5;
+  }
+  .service-card:hover .glow{ opacity:1; }
+  .service-card .icon-wrap{
+    position:absolute; top:40px; right:40px; width:96px; height:96px; opacity:0.9;
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
+  }
+  .service-card:hover .icon-wrap{ transform:translateX(10px) rotate(-2deg) scale(1.05); }
+  .service-card h3{ font-size:28px; margin-bottom:10px; position:relative; }
+  .service-card p{ color:var(--gray3); font-size:15px; font-weight:300; max-width:320px; position:relative; }
+
+  /* ---------- Stakeholders ---------- */
+  .stake-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media(max-width:860px){ .stake-grid{ grid-template-columns:1fr; } }
+  .stake-card{
+    border-radius:24px; padding:36px; border:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+    transition:transform .4s cubic-bezier(.2,.8,.2,1), background .4s ease, border-color .4s ease;
+  }
+  .stake-card:hover{ transform:translateY(-6px); background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.16); }
+  .stake-card .stake-icon{
+    width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:24px; background:rgba(230,57,70,0.12); color:var(--fire);
+    transition:box-shadow .4s ease, transform .4s ease;
+  }
+  .stake-card:hover .stake-icon{ box-shadow:0 0 26px -4px rgba(230,57,70,0.55); transform:scale(1.06); }
+  .stake-card h3{ font-size:20px; margin-bottom:16px; }
+  .stake-card li{
+    color:var(--gray2); font-size:14.5px; font-weight:300; padding-left:22px; position:relative; margin-bottom:10px; line-height:1.5;
+  }
+  .stake-card li::before{
+    content:''; position:absolute; left:0; top:8px; width:8px; height:1.5px; background:var(--fire);
+  }
+
+  /* ---------- Waitlist ---------- */
+  .waitlist-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  @media(max-width:860px){ .waitlist-grid{ grid-template-columns:1fr; } }
+  .wl-card{
+    text-align:center; padding:44px 28px; border-radius:24px; border:1px solid var(--line);
+    background:var(--bg-soft);
+    transition:transform .4s cubic-bezier(.2,.8,.2,1), border-color .4s ease, box-shadow .4s ease;
+  }
+  .wl-card:hover{
+    transform:translateY(-6px); border-color:rgba(230,57,70,0.4);
+    box-shadow:0 24px 60px -28px rgba(230,57,70,0.4);
+  }
+  .wl-card .wl-icon{ width:52px; height:52px; margin:0 auto 22px; color:var(--fire);
+    filter:drop-shadow(0 0 12px rgba(230,57,70,0.35)); }
+  .wl-card h3{ font-size:19px; margin-bottom:8px; }
+  .wl-card p{ color:var(--gray3); font-size:14px; margin-bottom:26px; font-weight:300; }
+
+  /* ---------- Contact ---------- */
+  .contact-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media(max-width:760px){ .contact-grid{ grid-template-columns:1fr; } }
+  .contact-card{
+    border-radius:24px; padding:36px; border:1px solid var(--line); background:var(--bg-soft);
+    transition:transform .4s cubic-bezier(.2,.8,.2,1), border-color .4s ease;
+  }
+  .contact-card:hover{ transform:translateY(-4px); border-color:rgba(255,255,255,0.16); }
+  .contact-card h3{ font-size:20px; margin-bottom:4px; }
+  .contact-card .role{ color:var(--gray3); font-size:13.5px; margin-bottom:20px; }
+  .contact-line{ display:flex; align-items:center; gap:12px; font-size:14.5px; color:var(--gray1); margin-bottom:10px; }
+  .contact-line svg{ color:var(--fire); flex-shrink:0; }
+
+  /* ---------- Footer ---------- */
+  footer{ border-top:1px solid var(--line); padding:56px 0 32px; position:relative; overflow:hidden; }
+  footer::before{
+    content:''; position:absolute; bottom:-60%; left:50%; transform:translateX(-50%);
+    width:70%; height:120%; pointer-events:none;
+    background:radial-gradient(ellipse at bottom, rgba(230,57,70,0.07), transparent 65%);
+  }
+  .footer-top{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:32px; margin-bottom:48px; position:relative; }
+  .footer-links{ display:flex; gap:28px; flex-wrap:wrap; }
+  .footer-links a{ font-size:14px; color:var(--gray3); transition:color .25s ease; }
+  .footer-links a:hover{ color:var(--white); }
+  .footer-bottom{ font-size:13px; color:var(--gray3); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; border-top:1px solid var(--line); padding-top:24px; position:relative; }
+
+  /* ---------- Legal pages ---------- */
+  .legal-page{ padding:160px 0 100px; max-width:760px; margin:0 auto; }
+  .legal-page h2{ font-size:36px; margin-bottom:8px; }
+  .legal-page .updated{ color:var(--gray3); font-size:14px; margin-bottom:40px; }
+  .legal-page h3{ font-size:18px; margin:36px 0 12px; color:var(--fire); font-weight:600; }
+  .legal-page p{ color:var(--gray2); font-size:15px; line-height:1.8; font-weight:300; margin-bottom:14px; }
+  .legal-page ul{ margin-bottom:14px; }
+  .legal-page li{ color:var(--gray2); font-size:15px; line-height:1.8; font-weight:300; padding-left:20px; position:relative; }
+  .legal-page li::before{ content:'—'; position:absolute; left:0; color:var(--gray3); }
+  .back-link{ display:inline-flex; align-items:center; gap:8px; color:var(--gray3); font-size:14px; margin-bottom:32px; transition:color .25s ease; }
+  .back-link:hover{ color:var(--white); }
+
+  .hidden{ display:none !important; }
+
+  /* reveal utility (GSAP targets) */
+  .reveal{ opacity:0; transform:translateY(28px); }
+
+  /* keyboard focus */
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--fire); outline-offset:3px; border-radius:6px;
+  }
+
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:var(--bg); }
+  ::-webkit-scrollbar-thumb{ background:#333; border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover{ background:var(--fire); }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001s !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001s !important;
+    }
+    #grain{ animation:none; }
+    .reveal{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="grain" aria-hidden="true"></div>
+
+<div id="loader">
+  <div style="text-align:center;">
+    <div class="mark logo-wordmark">ZION</div>
+    <div class="loader-line"></div>
+    <div id="loaderTag" style="margin-top:18px; font-size:14px; letter-spacing:0.08em; text-transform:uppercase; color:#919191; opacity:0;">Making rides affordable.</div>
+  </div>
+</div>
+
+<!-- ============ HEADER ============ -->
+<header id="siteHeader">
+  <nav class="wrap">
+    <a href="#home" data-nav="home" class="logo-wordmark nav-logo">ZION</a>
+    <ul class="nav-links">
+      <li><a href="#about" data-nav="home">About</a></li>
+      <li><a href="#services" data-nav="home">Services</a></li>
+      <li><a href="#stakeholders" data-nav="home">Why Zion</a></li>
+      <li><a href="#contact" data-nav="home">Contact</a></li>
+    </ul>
+    <a href="#waitlist" data-nav="home" class="btn-nav">Join Waitlist</a>
+  </nav>
+</header>
+
+<!-- ============ HOME PAGES ============ -->
+<div id="home-pages">
+
+  <!-- HERO -->
+  <section id="home" class="hero">
+    <div class="hero-glow">
+      <div class="orb orb-fire"></div>
+      <div class="orb orb-green"></div>
+      <div class="orb orb-fire-low"></div>
+      <div class="beam beam-1"></div>
+      <div class="beam beam-2"></div>
+    </div>
+
+    <div class="hero-mark-group" aria-hidden="true">
+      <div class="hero-mark-stack">
+        <div class="hero-mark-halo">ZION</div>
+        <div class="hero-mark">ZION</div>
+      </div>
+      <div class="hero-mark-sub">Affordable rides · Better pay · Zero surge</div>
+    </div>
+
+    <div class="hero-grid"></div>
+    <canvas id="dust" aria-hidden="true"></canvas>
+    <div class="hero-vignette" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <div class="hero-content">
+        <div class="hero-badge reveal"><span class="dot"></span> Now building in Hyderabad</div>
+        <h1 class="reveal">Making rides <span class="accent">effortless</span> and affordable.</h1>
+        <p class="sub reveal">Affordable rides for riders. Increased income for drivers. No surge pricing, ever.</p>
+        <div class="hero-ctas reveal">
+          <a href="#waitlist" data-nav="home" class="btn btn-primary magnetic">Join the waitlist</a>
+          <a href="#about" data-nav="home" class="btn btn-ghost magnetic">How it works</a>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal">
+        <div class="hero-card" id="heroCard">
+          <div class="fare-row">
+            <div class="veh">
+              <div class="veh-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 16h16M5 16l1.2-5.4A2 2 0 0 1 8.15 9h7.7a2 2 0 0 1 1.95 1.6L19 16M7 16v2M17 16v2M6 12h12"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg>
+              </div>
+              <div>
+                <div class="name">Zion Auto</div>
+                <div class="meta">3 seats · 6 min away</div>
+              </div>
+            </div>
+            <div class="price">₹89</div>
+          </div>
+          <div class="fare-row">
+            <div class="veh">
+              <div class="veh-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 13l1.6-4.8A2 2 0 0 1 6.5 7h11a2 2 0 0 1 1.9 1.36L21 13M4 13h16v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4Z"/><circle cx="7.5" cy="13.5" r="1.5"/><circle cx="16.5" cy="13.5" r="1.5"/></svg>
+              </div>
+              <div>
+                <div class="name">Zion Car</div>
+                <div class="meta">4 seats · 9 min away</div>
+              </div>
+            </div>
+            <div class="price">₹148</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#about" data-nav="home" class="scroll-cue reveal" aria-label="Scroll to explore">
+      <span class="scroll-cue-track"><span class="scroll-cue-dot"></span></span>
+      <span class="scroll-cue-label">Scroll</span>
+    </a>
+  </section>
+
+  <!-- ABOUT / MODEL -->
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">The model</span>
+        <h2>How Zion keeps rides affordable.</h2>
+        <p>Two systems working together — one is what makes Zion different, the other just makes it better.</p>
+      </div>
+
+      <div class="model-stack reveal">
+        <div class="model-block model-primary spot">
+          <span class="model-tag">Core model</span>
+          <h3>In-ride advertising</h3>
+          <p class="desc">Every Zion auto carries a screen that plays ads for the length of the ride — a captive, undistracted audience brands actually pay for. That ad revenue gets split: part goes straight to the driver as extra income, part funds lower fares for riders. This is the real reason Zion can charge less than everyone else.</p>
+          <div class="model-points">
+            <div class="model-point"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Screens installed in every auto</div>
+            <div class="model-point"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Ad revenue split with drivers</div>
+            <div class="model-point"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> The rest funds lower fares</div>
+          </div>
+        </div>
+
+        <div class="model-block model-bonus spot">
+          <span class="model-tag">Bonus, on top</span>
+          <h3>Monthly driver packages</h3>
+          <p class="desc">Instead of losing ~30% to per-ride commission like most platforms, drivers pay one flat monthly fee. It's a small cost that keeps the full fare in the driver's pocket — which means Zion can price rides even lower.</p>
+          <div class="price-chips">
+            <div class="price-chip">
+              <span class="veh-label">Auto</span>
+              <span class="price-value">₹500 <span>/ month</span></span>
+            </div>
+            <div class="price-chip">
+              <span class="veh-label">Cab</span>
+              <span class="price-value">₹1,500 <span>/ month</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Ride types</span>
+        <h2>Two ways to move.</h2>
+        <p>Pick what fits the trip — a quick auto across town or a comfortable car for the whole way.</p>
+      </div>
+
+      <div class="services-grid reveal">
+        <div class="service-card spot">
+          <div class="glow"></div>
+          <div class="icon-wrap">
+            <svg viewBox="0 0 96 96" fill="none" stroke="#e63946" stroke-width="1.4" opacity="0.9">
+              <path d="M14 62h68M18 62l4-19a7 7 0 0 1 6.8-5.3h38.4A7 7 0 0 1 74 42.7L78 62M22 62v9M74 62v9M18 46h60" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="27" cy="73" r="6"/><circle cx="69" cy="73" r="6"/>
+            </svg>
+          </div>
+          <h3>Zion Auto</h3>
+          <p>Quick, nimble, and easy on the fare — built for short hops and everyday errands across the city.</p>
+        </div>
+
+        <div class="service-card spot">
+          <div class="glow"></div>
+          <div class="icon-wrap">
+            <svg viewBox="0 0 96 96" fill="none" stroke="#e63946" stroke-width="1.4" opacity="0.9">
+              <path d="M10 54l7-20A8 8 0 0 1 24.5 28h47a8 8 0 0 1 7.5 5.3L86 54M14 54h68v16a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4v-4H26v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V54Z" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="29" cy="58" r="6"/><circle cx="67" cy="58" r="6"/>
+            </svg>
+          </div>
+          <h3>Zion Car</h3>
+          <p>Comfortable, air-conditioned, and reliable — for longer trips, luggage, or riding with company.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAKEHOLDERS -->
+  <section id="stakeholders">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Built for three sides</span>
+        <h2>What's in it for you.</h2>
+      </div>
+
+      <div class="stake-grid reveal">
+        <div class="stake-card spot">
+          <div class="stake-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></div>
+          <h3>Riders</h3>
+          <ul>
+            <li>Consistently lower fares</li>
+            <li>No surge pricing</li>
+            <li>Fast, reliable pickups</li>
+          </ul>
+        </div>
+        <div class="stake-card spot">
+          <div class="stake-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 16h16M5 16l1.2-5.4A2 2 0 0 1 8.15 9h7.7a2 2 0 0 1 1.95 1.6L19 16M7 16v2M17 16v2"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg></div>
+          <h3>Drivers</h3>
+          <ul>
+            <li>Fixed fee, every trip</li>
+            <li>Direct, easy payouts</li>
+            <li>Extra income via incentives</li>
+          </ul>
+        </div>
+        <div class="stake-card spot">
+          <div class="stake-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10v4a1 1 0 0 0 1 1h3l5 4V5L7 9H4a1 1 0 0 0-1 1Z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/></svg></div>
+          <h3>Advertisers</h3>
+          <ul>
+            <li>Captive, undistracted audience</li>
+            <li>Long dwell/exposure time</li>
+            <li>Stronger brand recall</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST -->
+  <section id="waitlist">
+    <div class="wrap">
+      <div class="section-head reveal" style="margin:0 auto 64px; text-align:center;">
+        <span class="eyebrow" style="justify-content:center;">Get in early</span>
+        <h2>Join the waitlist.</h2>
+        <p style="margin-left:auto; margin-right:auto;">We'll notify you the moment Zion launches in your city.</p>
+      </div>
+
+      <div class="waitlist-grid reveal">
+        <div class="wl-card spot">
+          <svg class="wl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><circle cx="17" cy="8.5" r="2.5"/><path d="M15.5 13.2a5.2 5.2 0 0 1 5.8 5.2"/></svg>
+          <h3>Riders</h3>
+          <p>Get early access to lower fares.</p>
+          <a href="https://forms.gle/yHoYvuZsRF1sFu1i7" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%; justify-content:center;">Join waitlist</a>
+        </div>
+        <div class="wl-card spot">
+          <svg class="wl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13l1.4-4.4A2 2 0 0 1 6.3 7.2h11.4a2 2 0 0 1 1.9 1.4L21 13M4 13h16v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4Z"/><circle cx="7.5" cy="13.5" r="1.4"/><circle cx="16.5" cy="13.5" r="1.4"/></svg>
+          <h3>Drivers</h3>
+          <p>Sign up for fixed-fee earnings.</p>
+          <a href="https://forms.gle/JF6qzRuMrySRpmSn6" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%; justify-content:center;">Join waitlist</a>
+        </div>
+        <div class="wl-card spot">
+          <svg class="wl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10v4a1 1 0 0 0 1 1h3l5 4V5L7 9H4a1 1 0 0 0-1 1Z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/><path d="M20 6a8.5 8.5 0 0 1 0 12"/></svg>
+          <h3>Advertisers</h3>
+          <p>Reserve placement for launch.</p>
+          <a href="https://forms.gle/K9iXZXwqmtjYqhMt5" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%; justify-content:center;">Join waitlist</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Get in touch</span>
+        <h2>Enquiries & collaborations.</h2>
+        <p>Reach out directly — we read everything.</p>
+      </div>
+
+      <div class="contact-grid reveal">
+        <div class="contact-card spot">
+          <h3>Mohith Prathipati</h3>
+          <div class="role">Co-founder, Zion</div>
+          <div class="contact-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg> +91 83282 39064</div>
+          <div class="contact-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg> mohith.prathipati@gmail.com</div>
+        </div>
+        <div class="contact-card spot">
+          <h3>Israel Akkamolla</h3>
+          <div class="role">Co-founder, Zion</div>
+          <div class="contact-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg> +91 99638 74424</div>
+          <div class="contact-line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg> isreal.akkamolla@gmail.com</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ LEGAL / OTHER PAGES ============ -->
+<div id="other-pages" class="hidden">
+
+  <div id="whoarewe" class="legal-page hidden">
+    <a href="#home" data-nav="home" class="back-link">← Back to home</a>
+    <h2>Who we are</h2>
+    <p>At Zion, we're reimagining ride-hailing for India.</p>
+    <p>We believe getting from one place to another should be fast, affordable, and sustainable — not dependent on endless discounts that vanish overnight.</p>
+    <p>Our platform is built to serve three communities together:</p>
+    <ul>
+      <li>Riders get the quickest rides at the lowest fares.</li>
+      <li>Drivers earn more with fair commissions and an extra source of income.</li>
+      <li>Brands reach a truly engaged audience through in-ride advertising.</li>
+    </ul>
+    <p>Unlike traditional ride-hailing apps, Zion isn't just about rides — it's about building a model where everyone wins. By combining mobility with in-vehicle advertising, we're creating a system that keeps fares low, drivers happy, and advertisers remembered.</p>
+    <p style="font-weight:600; color:var(--white);">To make ride-hailing sustainable, engaging, and rewarding for everyone.</p>
+  </div>
+
+  <div id="privacypolicy" class="legal-page hidden">
+    <a href="#home" data-nav="home" class="back-link">← Back to home</a>
+    <h2>Privacy Policy</h2>
+    <p class="updated">Last updated 22-09-25</p>
+    <p>This Privacy Policy describes how Zion (a sole proprietorship owned by Mohith Prathipati) collects, uses, and protects your information when you use our website, mobile application, and related services. By using Zion, you agree to the terms of this Privacy Policy.</p>
+    <h3>Information we collect</h3>
+    <ul>
+      <li>Personal information — name, phone number, email, profile photo.</li>
+      <li>Ride information — pickup & drop locations, trip duration, payment method.</li>
+      <li>Driver information — driving license, vehicle details, bank/payment info.</li>
+      <li>Device information — device type, OS, app version, IP address.</li>
+    </ul>
+    <h3>How we use your information</h3>
+    <ul>
+      <li>Provide ride-hailing services and process payments.</li>
+      <li>Connect riders with nearby drivers.</li>
+      <li>Improve app performance and user experience.</li>
+      <li>Send notifications, updates, and important service information.</li>
+      <li>Comply with legal and regulatory requirements.</li>
+    </ul>
+    <h3>Sharing your information</h3>
+    <ul>
+      <li>Drivers and riders (only essential trip-related info).</li>
+      <li>Payment providers (e.g. Razorpay) for processing payments.</li>
+      <li>Government or law enforcement when legally required.</li>
+    </ul>
+    <h3>Data storage & security</h3>
+    <p>Data is stored securely on Firebase (Google Cloud) and protected with industry-standard encryption. We take reasonable measures to prevent unauthorized access or misuse of your data.</p>
+    <h3>Your rights</h3>
+    <ul>
+      <li>Access and update your personal data.</li>
+      <li>Request deletion of your account and data.</li>
+      <li>Opt out of non-essential communications.</li>
+    </ul>
+    <h3>Cookies & tracking</h3>
+    <p>Our website and app may use cookies or similar technologies to enhance user experience and improve services.</p>
+    <h3>Children's privacy</h3>
+    <p>Zion is not directed to children under 18. We do not knowingly collect data from minors.</p>
+    <h3>Changes to this policy</h3>
+    <p>We may update this Privacy Policy from time to time. Updates will be posted on this page with a revised "last updated" date.</p>
+    <h3>Contact us</h3>
+    <p>Zion (Sole Proprietorship) · Owner: Mohith Prathipati<br>Hyderabad, Telangana, India<br>mohith.prathipati@gmail.com · +91 83282 39064</p>
+  </div>
+
+  <div id="termsofservice" class="legal-page hidden">
+    <a href="#home" data-nav="home" class="back-link">← Back to home</a>
+    <h2>Terms of Service</h2>
+    <p class="updated">Last updated 22-09-25</p>
+    <p>Welcome to Zion, a ride-hailing service operated as a sole proprietorship by Mohith Prathipati ("Zion," "we," "our," or "us"). By accessing or using the Zion mobile application, website, or services (collectively, the "Services"), you agree to be bound by these Terms of Service. If you do not agree, please do not use our Services.</p>
+    <h3>1. Use of Services</h3>
+    <ul>
+      <li>Zion connects riders with drivers for transportation services.</li>
+      <li>You must be at least 18 years old to use the Services.</li>
+      <li>You agree to provide accurate and up-to-date information when creating an account.</li>
+      <li>Zion reserves the right to refuse or terminate service if terms are violated.</li>
+    </ul>
+    <h3>2. User Accounts</h3>
+    <ul>
+      <li>Riders and drivers must register using a valid mobile number and/or email.</li>
+      <li>You are responsible for maintaining the confidentiality of your account.</li>
+      <li>Any activity under your account is your responsibility.</li>
+    </ul>
+    <h3>3. Payments</h3>
+    <ul>
+      <li>All payments are processed securely through Razorpay or other approved payment gateways.</li>
+      <li>Fares are calculated based on trip details (distance, time, location).</li>
+      <li>Drivers may receive payments directly to their linked bank accounts.</li>
+      <li>By booking a ride, you authorize Zion to process the applicable fare.</li>
+    </ul>
+    <h3>4. Driver Responsibilities</h3>
+    <ul>
+      <li>Drivers must hold a valid driving license and provide correct vehicle information.</li>
+      <li>Drivers must comply with traffic laws and ensure rider safety.</li>
+      <li>Zion is not responsible for disputes between riders and drivers but may mediate if required.</li>
+    </ul>
+    <h3>5. Rider Responsibilities</h3>
+    <ul>
+      <li>Riders must provide accurate pickup and drop-off details.</li>
+      <li>Riders must treat drivers and vehicles respectfully.</li>
+      <li>Cancellation fees may apply for last-minute cancellations.</li>
+    </ul>
+    <h3>6. Limitations of Liability</h3>
+    <ul>
+      <li>Zion is a technology platform connecting riders and drivers.</li>
+      <li>We do not own vehicles or employ drivers — drivers act as independent contractors.</li>
+      <li>Zion is not liable for delays, accidents, personal injuries, or lost items during rides.</li>
+    </ul>
+    <h3>7. Prohibited Activities</h3>
+    <ul>
+      <li>Using Zion for unlawful or fraudulent purposes.</li>
+      <li>Harassing, harming, or exploiting drivers or riders.</li>
+      <li>Attempting to hack, reverse-engineer, or disrupt the Services.</li>
+    </ul>
+    <h3>8. Data & Privacy</h3>
+    <p>Your personal data is handled as per our Privacy Policy. By using our Services, you consent to our data practices.</p>
+    <h3>9. Termination</h3>
+    <ul>
+      <li>Zion may suspend or terminate your account if you violate these Terms.</li>
+      <li>You may delete your account at any time by contacting support.</li>
+    </ul>
+    <h3>10. Changes to Terms</h3>
+    <p>We may update these Terms of Service from time to time. Updates are effective immediately when posted.</p>
+    <h3>11. Governing Law</h3>
+    <p>These Terms are governed by the laws of India. Disputes are subject to the jurisdiction of the courts in Hyderabad, Telangana.</p>
+    <h3>12. Contact Us</h3>
+    <p>Zion (Sole Proprietorship) · Owner: Mohith Prathipati<br>Hyderabad, Telangana, India<br>mohith.prathipati@gmail.com · +91 83282 39064</p>
+  </div>
+
+  <div id="cancellation-refunds" class="legal-page hidden">
+    <a href="#home" data-nav="home" class="back-link">← Back to home</a>
+    <h2>Cancellations & Refunds</h2>
+    <p>At Zion, we strive to provide our riders with a seamless and affordable travel experience. We understand that plans may change, so here's how our policy works:</p>
+    <h3>Ride Cancellations (Riders)</h3>
+    <ul>
+      <li>Riders may cancel a ride at any time before the driver has arrived at the pickup location.</li>
+      <li>In certain cases, a nominal cancellation fee may apply to compensate the driver.</li>
+      <li>Cancelling within 2 minutes of booking incurs no fee.</li>
+    </ul>
+    <h3>Ride Cancellations (Drivers)</h3>
+    <ul>
+      <li>Drivers are expected to honor accepted trips. Frequent cancellations may result in warnings, penalties, or suspension.</li>
+      <li>If a driver cancels, riders are not charged any cancellation fee.</li>
+    </ul>
+    <h3>Refunds</h3>
+    <ul>
+      <li>If a ride is not completed due to driver cancellation, technical issues, or other valid reasons, any advance payment is refunded to your original payment method.</li>
+      <li>Refunds typically process within 5–7 business days.</li>
+      <li>No refunds are issued once a ride has been completed.</li>
+    </ul>
+    <h3>Disputes</h3>
+    <p>In case of disputes related to fares, cancellations, or payments, riders may raise a ticket via Help & Support in the app. Each case is reviewed by our team, with refunds provided where applicable.</p>
+  </div>
+
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <a href="#home" data-nav="home" class="logo-wordmark" style="font-size:28px;">ZION</a>
+        <p style="color:var(--gray3); font-size:14px; max-width:280px; margin-top:14px; font-weight:300;">Making rides effortless and affordable — for riders, drivers, and brands alike.</p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="#whoarewe" data-nav="other">Who we are</a></li>
+        <li><a href="#privacypolicy" data-nav="other">Privacy Policy</a></li>
+        <li><a href="#termsofservice" data-nav="other">Terms of Service</a></li>
+        <li><a href="#cancellation-refunds" data-nav="other">Cancellations & Refunds</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Zion. All rights reserved.</span>
+      <span>Hyderabad, Telangana, India</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = window.matchMedia('(hover: none)').matches;
+
+  /* ---------- Lenis smooth scroll ---------- */
+  const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+  function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time)=>{ lenis.raf(time*1000); });
+  gsap.ticker.lagSmoothing(0);
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ---------- Split hero H1 into words for a staggered reveal ---------- */
+  const h1 = document.querySelector('.hero h1');
+  if (h1 && !reducedMotion) {
+    h1.innerHTML = h1.innerHTML.split(/(<span class="accent">.*?<\/span>)/g).map(chunk => {
+      if (chunk.startsWith('<span')) return `<span class="word">${chunk}</span>`;
+      return chunk.split(' ').filter(Boolean).map(w => `<span class="word">${w}</span>`).join(' ');
+    }).join(' ');
+  }
+
+  /* ---------- Loader → cinematic hero entrance ---------- */
+  const tl = gsap.timeline();
+  tl.to('#loader .mark', { opacity: 1, duration:.5 })
+    .to('#loader .loader-line', { width: 160, duration:.7, ease:'power2.out' }, '-=0.2')
+    .to('#loaderTag', { opacity: 1, duration:.6 }, '-=0.3')
+    .to('#loader', { opacity:0, duration:.6, delay:.5, onComplete:()=>{ document.getElementById('loader').style.display='none'; } })
+    .from('.hero-mark-stack', { opacity:0, scale:0.92, filter:'blur(18px)', duration:1.5, ease:'power3.out' }, '-=0.35')
+    .from('.hero-mark-sub', { opacity:0, y:14, letterSpacing:'0.6em', duration:1.1, ease:'power3.out' }, '-=1.0')
+    .from('.hero-badge', { opacity:0, y:16, duration:.6 }, '-=0.7')
+    .from('.hero h1 .word', { opacity:0, y:34, filter:'blur(8px)', duration:.8, stagger:.06, ease:'power3.out' }, '-=0.4')
+    .from('.hero p.sub', { opacity:0, y:18, duration:.7 }, '-=0.5')
+    .from('.hero-ctas', { opacity:0, y:18, duration:.6 }, '-=0.4')
+    .from('.hero-visual', { opacity:0, y:44, rotationX:6, transformOrigin:'center top', duration:1, ease:'power3.out' }, '-=0.3')
+    .from('.scroll-cue', { opacity:0, y:10, duration:.6 }, '-=0.2');
+
+  // reduced-motion fallback: just clear the loader and show hero words
+  if (reducedMotion) {
+    tl.progress(1);
+    document.getElementById('loader').style.display = 'none';
+  }
+
+  /* ---------- Scroll story: mark shrinks & hands off to nav logo ---------- */
+  gsap.to('.hero-mark-group', {
+    scale:0.62, yPercent:-16, opacity:0, filter:'blur(6px)', ease:'none',
+    scrollTrigger:{ trigger:'#home', start:'top top', end:'75% top', scrub:true }
+  });
+  gsap.to('.hero-grid', {
+    rotation:3, scale:1.1, opacity:0.25, ease:'none',
+    scrollTrigger:{ trigger:'#home', start:'top top', end:'bottom top', scrub:true }
+  });
+  gsap.to('.orb-fire', {
+    yPercent:22, ease:'none',
+    scrollTrigger:{ trigger:'#home', start:'top top', end:'bottom top', scrub:true }
+  });
+  ScrollTrigger.create({
+    trigger:'#home', start:'55% top',
+    onEnter: () => document.getElementById('siteHeader').classList.add('mark-landed'),
+    onLeaveBack: () => document.getElementById('siteHeader').classList.remove('mark-landed')
+  });
+
+  /* ---------- Dust particles (hero) ---------- */
+  const canvas = document.getElementById('dust');
+  if (canvas && !reducedMotion) {
+    const ctx = canvas.getContext('2d');
+    let W, H, parts = [];
+    function resize(){
+      const hero = document.getElementById('home');
+      W = canvas.width = hero.offsetWidth;
+      H = canvas.height = hero.offsetHeight;
+    }
+    resize(); window.addEventListener('resize', resize);
+    const COUNT = Math.min(70, Math.floor(window.innerWidth / 18));
+    for (let i=0; i<COUNT; i++){
+      parts.push({
+        x: Math.random()*1, y: Math.random()*1,
+        r: Math.random()*1.6 + 0.4,
+        vy: -(Math.random()*0.00022 + 0.00006),
+        vx: (Math.random()-0.5)*0.00012,
+        a: Math.random()*0.5 + 0.12,
+        tw: Math.random()*Math.PI*2,
+        red: Math.random() < 0.28
+      });
+    }
+    let visible = true;
+    ScrollTrigger.create({
+      trigger:'#home', start:'top bottom', end:'bottom top',
+      onToggle: self => visible = self.isActive
+    });
+    (function tick(t){
+      requestAnimationFrame(tick);
+      if (!visible) return;
+      ctx.clearRect(0,0,W,H);
+      for (const p of parts){
+        p.y += p.vy; p.x += p.vx; p.tw += 0.02;
+        if (p.y < -0.02){ p.y = 1.02; p.x = Math.random(); }
+        if (p.x < -0.02) p.x = 1.02; if (p.x > 1.02) p.x = -0.02;
+        const alpha = p.a * (0.6 + 0.4*Math.sin(p.tw));
+        ctx.beginPath();
+        ctx.arc(p.x*W, p.y*H, p.r, 0, Math.PI*2);
+        ctx.fillStyle = p.red
+          ? `rgba(230,57,70,${alpha})`
+          : `rgba(255,255,255,${alpha*0.7})`;
+        ctx.fill();
+      }
+    })();
+  }
+
+  /* ---------- Scroll reveals ---------- */
+  gsap.utils.toArray('.reveal').forEach(el => {
+    if (el.closest('.hero')) return; // hero handled by intro tl
+    gsap.to(el, {
+      opacity:1, y:0, duration:.9, ease:'power3.out',
+      scrollTrigger:{ trigger:el, start:'top 85%' }
+    });
+  });
+
+  gsap.utils.toArray('.model-block').forEach((el,i)=>{
+    gsap.from(el, { opacity:0, y:24, duration:.7, delay:i*0.12, ease:'power2.out',
+      scrollTrigger:{ trigger:el, start:'top 88%' } });
+  });
+  gsap.utils.toArray('.service-card').forEach((el,i)=>{
+    gsap.from(el, { opacity:0, y:30, duration:.8, delay:i*0.1, ease:'power2.out',
+      scrollTrigger:{ trigger:el, start:'top 88%' } });
+  });
+  gsap.utils.toArray('.stake-card').forEach((el,i)=>{
+    gsap.from(el, { opacity:0, y:30, duration:.7, delay:i*0.1, ease:'power2.out',
+      scrollTrigger:{ trigger:el, start:'top 88%' } });
+  });
+  gsap.utils.toArray('.wl-card').forEach((el,i)=>{
+    gsap.from(el, { opacity:0, y:30, duration:.7, delay:i*0.08, ease:'power2.out',
+      scrollTrigger:{ trigger:el, start:'top 88%' } });
+  });
+  gsap.utils.toArray('.contact-card').forEach((el,i)=>{
+    gsap.from(el, { opacity:0, y:24, duration:.7, delay:i*0.1, ease:'power2.out',
+      scrollTrigger:{ trigger:el, start:'top 88%' } });
+  });
+
+  /* ---------- Header on scroll ---------- */
+  const header = document.getElementById('siteHeader');
+  ScrollTrigger.create({
+    start: 40, end: 99999,
+    onUpdate: self => header.classList.toggle('scrolled', self.scroll() > 40)
+  });
+
+  /* ---------- Fade the scroll cue out once the hero is left ---------- */
+  ScrollTrigger.create({
+    trigger: '#home', start: 'bottom 90%',
+    onEnter: () => gsap.to('.scroll-cue', { opacity:0, duration:.4, pointerEvents:'none' }),
+    onLeaveBack: () => gsap.to('.scroll-cue', { opacity:1, duration:.4, pointerEvents:'auto' })
+  });
+
+  /* ---------- Spotlight cards follow the cursor ---------- */
+  if (!isTouch) {
+    document.querySelectorAll('.spot').forEach(card=>{
+      card.addEventListener('mousemove', e=>{
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', ((e.clientX - r.left)/r.width*100) + '%');
+        card.style.setProperty('--my', ((e.clientY - r.top)/r.height*100) + '%');
+      });
+    });
+
+    /* ---------- Magnetic buttons ---------- */
+    document.querySelectorAll('.magnetic').forEach(btn=>{
+      btn.addEventListener('mousemove', e=>{
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width/2) * 0.22;
+        const y = (e.clientY - r.top - r.height/2) * 0.32;
+        gsap.to(btn, { x, y, duration:.4, ease:'power3.out' });
+      });
+      btn.addEventListener('mouseleave', ()=>{
+        gsap.to(btn, { x:0, y:0, duration:.6, ease:'elastic.out(1, 0.45)' });
+      });
+    });
+
+    /* ---------- Hero card 3D tilt ---------- */
+    const heroCard = document.getElementById('heroCard');
+    if (heroCard && !reducedMotion) {
+      const visual = heroCard.closest('.hero-visual');
+      visual.addEventListener('mousemove', e=>{
+        const r = heroCard.getBoundingClientRect();
+        const rx = ((e.clientY - r.top)/r.height - 0.5) * -5;
+        const ry = ((e.clientX - r.left)/r.width - 0.5) * 7;
+        gsap.to(heroCard, { rotationX:rx, rotationY:ry, transformPerspective:1200, duration:.5, ease:'power2.out' });
+      });
+      visual.addEventListener('mouseleave', ()=>{
+        gsap.to(heroCard, { rotationX:0, rotationY:0, duration:.8, ease:'power3.out' });
+      });
+    }
+  }
+
+  /* ---------- Subtle parallax of the watermark toward the cursor ---------- */
+  if (!isTouch && !reducedMotion) {
+    const markStack = document.querySelector('.hero-mark-stack');
+    window.addEventListener('mousemove', e=>{
+      const dx = (e.clientX / window.innerWidth - 0.5);
+      const dy = (e.clientY / window.innerHeight - 0.5);
+      gsap.to(markStack, { x: dx*26, y: dy*16, duration:1.2, ease:'power2.out' });
+      gsap.to('.orb-fire', { xPercent: dx*4, duration:1.6, ease:'power2.out' });
+    });
+  }
+
+  /* ---------- SPA-style section routing (home vs legal pages) ---------- */
+  const homePages = document.getElementById('home-pages');
+  const otherPages = document.getElementById('other-pages');
+  const allOtherSections = otherPages.querySelectorAll(':scope > div');
+  const homeIds = ['home','about','services','stakeholders','waitlist','contact'];
+  const otherIds = ['whoarewe','privacypolicy','termsofservice','cancellation-refunds'];
+
+  function showRoute(id){
+    if (homeIds.includes(id) || !otherIds.includes(id)) {
+      homePages.classList.remove('hidden');
+      otherPages.classList.add('hidden');
+      allOtherSections.forEach(s=>s.classList.add('hidden'));
+      if (id && id !== 'home') {
+        const target = document.getElementById(id);
+        if (target) lenis.scrollTo(target, { offset: -84 });
+      } else {
+        lenis.scrollTo(0, { immediate:true });
+      }
+    } else {
+      homePages.classList.add('hidden');
+      otherPages.classList.remove('hidden');
+      allOtherSections.forEach(s=>s.classList.add('hidden'));
+      const target = document.getElementById(id);
+      if (target) target.classList.remove('hidden');
+      lenis.scrollTo(0, { immediate:true });
+    }
+  }
+
+  document.querySelectorAll('a[data-nav]').forEach(link=>{
+    link.addEventListener('click', e=>{
+      e.preventDefault();
+      const id = link.getAttribute('href').substring(1);
+      history.pushState(null, '', '#' + id);
+      showRoute(id);
+    });
+  });
+  window.addEventListener('popstate', ()=> showRoute(location.hash.substring(1) || 'home'));
+
+  showRoute(location.hash.substring(1) || 'home');
+});
+</script>
+
+</body>
+</html>
